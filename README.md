@@ -1,6 +1,10 @@
 # VPS-Scripts
  各类VPS脚本
 
+网络重装（国内）
+```
+bash <(wget –-no-check-certificate -qO- "https://moeclub.org/attachment/LinuxShell/InstallNET.sh") -d 11 -v 64 -p password -port 22 --mirror "https://mirrors.ustc.edu.cn/debian/"
+```
 安装 locale && BBR
 ```
 wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/ini.sh | bash
