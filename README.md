@@ -5,6 +5,10 @@
 ```
 wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/ini.sh | bash
 ```
+更新镜像源
+```
+wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/ini.sh | bash
+```
 
 安装 docker && docker-compose
 ```
