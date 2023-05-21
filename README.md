@@ -3,7 +3,7 @@
 
 安装 locale && BBR
 ```
-https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/ini.sh
+wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/ini.sh | bash
 ```
 
 安装 docker && docker-compose
