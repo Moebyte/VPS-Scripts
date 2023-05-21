@@ -7,7 +7,7 @@ wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/ini.sh | ba
 ```
 更新镜像源
 ```
-wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/ini.sh | bash
+wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/apt-sources.sh | bash
 ```
 
 安装 docker && docker-compose
