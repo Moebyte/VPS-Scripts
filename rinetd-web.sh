@@ -19,7 +19,7 @@ do
         if [[ $2 =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]+$ ]]; then
             port="$2"
         else
-            echo "Invalid port format. Please use IP:PORT or :PORT format."
+            echo "Invalid port format. Please use IP:PORT format."
             exit 1
         fi
         shift
