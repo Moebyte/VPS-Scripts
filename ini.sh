@@ -4,8 +4,8 @@
 # Author: MoeByte
 
 # Set variables
-BBR_INSTALL_SCRIPT_CHINA='https://gh.lib.cx/https://raw.githubusercontent.com/moeclub/apt/master/bbr/bbr.sh'
-BBR_INSTALL_SCRIPT_OTHERS='https://raw.githubusercontent.com/moeclub/apt/master/bbr/bbr.sh'
+BBR_INSTALL_SCRIPT_CHINA='https://gh.lib.cx/https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/bbr.sh'
+BBR_INSTALL_SCRIPT_OTHERS='https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/bbr.sh'
 TIMEZONE='Asia/Shanghai'
 LOCALE='en_US.UTF-8'
 
