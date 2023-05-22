@@ -40,9 +40,9 @@ if [[ -z $port ]]; then
     port="0.0.0.0:8080"
 fi
 
-# 下载 rinetd-web 并移动至 /opt/rinetd
-curl -sSL "https://github.com/Moebyte/VPS-Scripts/raw/main/rinetd-web" -o /opt/rinetd/rinetd-web
-chmod +x /opt/rinetd/rinetd-web
+# 下载 rinetd-web 并移动至 /opt/rinetd-web
+curl -sSL "https://github.com/Moebyte/VPS-Scripts/raw/main/rinetd-web" -o /opt/rinetd-web/rinetd-web
+chmod +x /opt/rinetd-web/rinetd-web
 
 # 创建 systemd 服务
 cat <<EOF > /etc/systemd/system/rinetd-web.service
@@ -52,8 +52,8 @@ After=syslog.target network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/rinetd
-ExecStart=/opt/rinetd/rinetd-web -p $password -port $port
+WorkingDirectory=/opt/rinetd-web
+ExecStart=/opt/rinetd-web/rinetd-web -p $password -port $port
 Restart=always
 User=root
 
