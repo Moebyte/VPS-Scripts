@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script Name: docker.sh
+# Author: MoeByte
+
 # Check if user has root privileges
 if [ "$EUID" -ne 0 ]
   then echo "Please run as root"

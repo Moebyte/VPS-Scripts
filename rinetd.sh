@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script Name: rinetd.sh
+# Author: MoeByte
+
 # 判断是否为 root 用户
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script Name: apt-sources.sh
+# Author: MoeByte
+
 # 备份原有的 sources.list 文件
 cp /etc/apt/sources.list /etc/apt/sources.list.bak
 

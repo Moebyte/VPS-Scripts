@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script Name: ini.sh
+# Author: MoeByte
+
 # Set variables
 BBR_INSTALL_SCRIPT_CHINA='https://gh.lib.cx/https://raw.githubusercontent.com/moeclub/apt/master/bbr/bbr.sh'
 BBR_INSTALL_SCRIPT_OTHERS='https://raw.githubusercontent.com/moeclub/apt/master/bbr/bbr.sh'

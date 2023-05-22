@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script Name: rinetd.sh
+# Author: MoeByte
+
 # 默认参数值
 password=""
 port=""
@@ -41,8 +44,8 @@ if [[ -z $port ]]; then
 fi
 
 # 下载 rinetd-web 并移动至 /opt/rinetd-web
-curl -sSL "https://github.com/Moebyte/VPS-Scripts/raw/main/rinetd-web" -o /opt/rinetd-web/rinetd-web
-chmod +x /opt/rinetd-web/rinetd-web
+curl -sSL "https://github.com/Moebyte/VPS-Scripts/raw/main/rinetd-web" -o /opt/rinetd/rinetd-web
+chmod +x /opt/rinetd/rinetd-web
 
 # 创建 systemd 服务
 cat <<EOF > /etc/systemd/system/rinetd-web.service
@@ -52,8 +55,8 @@ After=syslog.target network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/rinetd-web
-ExecStart=/opt/rinetd-web/rinetd-web -p $password -port $port
+WorkingDirectory=/opt/rinetd
+ExecStart=/opt/rinetd/rinetd-web -p pass -port :8080
 Restart=always
 User=root
 
