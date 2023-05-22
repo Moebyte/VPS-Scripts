@@ -1,30 +1,37 @@
 #!/bin/bash
 
-# Check if locale is already set to en_US.UTF-8
-if ! locale | grep -q "LANG=en_US.UTF-8"; then
-   
-    # Update and upgrade packages
-    apt update
-    apt upgrade -y
+# Set variables
+BBR_INSTALL_SCRIPT_CHINA='https://gh.lib.cx/https://raw.githubusercontent.com/moeclub/apt/master/bbr/bbr.sh'
+BBR_INSTALL_SCRIPT_OTHERS='https://raw.githubusercontent.com/moeclub/apt/master/bbr/bbr.sh'
+TIMEZONE='Asia/Shanghai'
+LOCALE='en_US.UTF-8'
 
+# Check if locale is already set to $LOCALE
+if ! locale | grep -q "LANG=$LOCALE"; then
+    # Update package list
+    apt update || exit 1
+    # Upgrade packages
+    apt upgrade -y || exit 1
     # Install essential packages
-    apt install -y wget curl vim dnsutils mtr unzip gcc make automake net-tools sudo iptables iftop lsof locales
-	
+    apt install -y wget curl vim dnsutils mtr unzip gcc make automake net-tools sudo iptables iftop lsof locales || exit 1
     # Generate locale
-    echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
-    locale-gen en_US.UTF-8
-    update-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 LC_ALL=en_US.UTF-8
+    echo "$LOCALE UTF-8" >> /etc/locale.gen || exit 1
+    locale-gen $LOCALE || exit 1
+    update-locale LANG=$LOCALE LANGUAGE=$LOCALE LC_ALL=$LOCALE || exit 1
 fi
 
 # Check if TCP congestion control is already set to bbr
 if ! sysctl net.ipv4.tcp_available_congestion_control | grep -q "bbr"; then
-
-    # Set timezone to Asia/Shanghai
-    rm -rf /etc/localtime && ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
+    # Set timezone
+    rm -rf /etc/localtime && ln -s /usr/share/zoneinfo/$TIMEZONE /etc/localtime || exit 1
     # Customize bash prompt
-    echo "PS1=\"\[\e[35;1m\][\u@\h \t \w]\\\\$\[\e[0m\]\"" >> ~/.bashrc
-
+    echo "PS1=\"\[\e[35;1m\][\u@\h \t \w]\\\\$\[\e[0m\]\"" >> ~/.bashrc || exit 1
     # Install BBR
-    bash <(wget --no-check-certificate -qO- 'https://raw.githubusercontent.com/moeclub/apt/master/bbr/bbr.sh')
+    if curl -m 10 -s https://ipapi.co/json | grep -q 'China'; then
+        bash <(wget --no-check-certificate -qO- $BBR_INSTALL_SCRIPT_CHINA) || exit 1
+    else
+        bash <(wget --no-check-certificate -qO- $BBR_INSTALL_SCRIPT_OTHERS) || exit 1
+    fi
 fi
+
+echo "Setup completed successfully!"
