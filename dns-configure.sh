@@ -11,8 +11,8 @@ if ! command -v curl &> /dev/null; then
     apt update && apt install -y curl
 fi
 
-ipv4=$(curl -4 ipv4.ip.sb 2>/dev/null)
-ipv6=$(curl -6 ipv6.ip.sb 2>/dev/null)
+ipv4=$(curl -4 ip.sb 2>/dev/null)
+ipv6=$(curl -6 ip.sb 2>/dev/null)
 
 # Set DNS servers based on IP location
 if curl -m 10 -s https://ipapi.co/json | grep -q 'China'; then
