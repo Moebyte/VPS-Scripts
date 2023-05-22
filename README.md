@@ -1,5 +1,5 @@
 # VPS-Scripts
- 各类VPS脚本
+ 各类VPS脚本（仅适用于Debian）
 
 网络重装（国内）
 ```
