@@ -16,7 +16,7 @@ fi
 # 检查是否已经安装过 rinetd
 if [ -x "$(command -v rinetd)" ]; then
     installed_version=$(rinetd -v | awk '{print $2}')
-    latest_version=$(curl -s https://api.github.com/repos/samhocevar/rinetd/releases/latest | grep name | cut -d '"' -f 4 | grep -Eo '[0-9]+\.[0-9]+')
+    latest_version=$(curl -s https://api.github.com/repos/samhocevar/rinetd/releases/latest | grep tag_name | sed 's/[^0-9\.]//g')
     if [ "$installed_version" == "$latest_version" ]; then
         echo "rinetd is already installed and up to date."
         exit 0
