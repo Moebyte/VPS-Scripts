@@ -5,6 +5,10 @@
 ```
 bash <(wget –-no-check-certificate -qO- "https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/InstallNET.sh") -d 11 -v 64 -p password -port 22 --mirror "https://mirrors.ustc.edu.cn/debian/"
 ```
+Debian配置DNS（国外）
+```
+wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/dns-configure.sh | bash
+```
 安装 locale && BBR
 ```
 wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/ini.sh | bash
