@@ -22,3 +22,7 @@ wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/apt-sources
 ```
 curl -fsSL https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/docker.sh | bash
 ```
+安装rinetd
+```
+https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/rinetd.sh
+```
