@@ -26,6 +26,5 @@ curl -fsSL https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/docker.sh 
 ```
 wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/rinetd.sh | bash
 ```
-```
 ~~wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/rinetd-web.sh | bash rinetd-web.sh -p password -port :8080~~
-```
+
