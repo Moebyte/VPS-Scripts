@@ -37,7 +37,7 @@ curl -L -O $download_url
 
 # 解压安装包
 tar -zxvf rinetd-*.tar.gz
-mv rinetd-0.* rinetd
+mv rinetd-* rinetd
 mv rinetd /opt/
 cd /opt/rinetd/
 
