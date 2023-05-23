@@ -20,11 +20,11 @@ wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/apt-sources
 
 安装 docker && docker-compose
 ```
-curl -fsSL https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/docker.sh | bash
+wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/docker.sh | bash
 ```
 安装 golang
 ```
-curl -fsSL https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/golang.sh | bash
+wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/golang.sh | bash
 ```
 
 安装rinetd
