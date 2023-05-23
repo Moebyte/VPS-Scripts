@@ -22,7 +22,7 @@ wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/apt-sources
 ```
 curl -fsSL https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/docker.sh | bash
 ```
-安装 docker && docker-compose
+安装 golang
 ```
 curl -fsSL https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/golang.sh | bash
 ```
