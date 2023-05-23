@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script Name: golang.sh
+# Author: MoeByte
+
 # 判断IP地址是否为中国
 if curl -m 10 -s https://ipapi.co/json | grep -q 'China'; then
   # 中国用户使用 golang.google.cn/dl/
