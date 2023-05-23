@@ -17,10 +17,14 @@ stable_versions=$(curl -s "$base_url?mode=json" | grep -E 'version|stable' | awk
 # 选择最新的版本
 latest_version=$(echo $stable_versions | tr ' ' '\n' | grep -E 'go[0-9]+\.[0-9]+\.[0-9]+' | sort -rV | head -n 1)
 
-# 获取最新版本的链接
-download_url="$base_url$latest_version.linux-amd64.tar.gz"
+# 检查最新版本是否已经安装
+if go version | grep -q $latest_version; then
+  echo "已经安装了最新的 Go 版本"
+  exit 0
+fi
 
 # 下载最新版本的安装包
+download_url="$base_url$latest_version.linux-amd64.tar.gz"
 if ! wget $download_url; then
   echo "下载失败"
   exit 1
@@ -35,8 +39,10 @@ fi
 # 解压安装包
 sudo tar -C /usr/local -xzf $latest_version.linux-amd64.tar.gz
 
-# 设置环境变量
-echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc && source ~/.bashrc
+# 更新环境变量
+if ! grep -q '/usr/local/go/bin' ~/.bashrc; then
+  echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc && source ~/.bashrc
+fi
 
 # 检查是否成功设置了环境变量
 if ! command -v go &> /dev/null; then
