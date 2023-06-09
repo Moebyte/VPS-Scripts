@@ -9,6 +9,14 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+# Function to check if Docker is already installed
+check_docker_installed() {
+    if docker --version > /dev/null 2>&1; then
+        echo "Docker is already installed. Exiting."
+        exit
+    fi
+}
+
 # Function to check IP address and set mirror
 set_mirror() {
     if curl -m 10 -s https://ipapi.co/json | grep 'China'; then
@@ -17,6 +25,9 @@ set_mirror() {
         MIRROR="https://download.docker.com/linux/debian"
     fi
 }
+
+# Check if Docker is already installed
+check_docker_installed
 
 # Remove old versions of Docker
 apt-get remove docker docker-engine docker.io containerd runc
