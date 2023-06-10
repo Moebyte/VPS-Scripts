@@ -28,19 +28,19 @@ fi
 
 # 下载最新版本的安装包
 download_url="$base_url$latest_version.linux-amd64.tar.gz"
-if ! wget $download_url; then
+if ! wget -P /tmp $download_url; then
   echo "下载失败"
   exit 1
 fi
 
 # 检查下载的文件是否存在
-if [ ! -f "$latest_version.linux-amd64.tar.gz" ]; then
+if [ ! -f "/tmp/$latest_version.linux-amd64.tar.gz" ]; then
   echo "下载的文件不存在"
   exit 1
 fi
 
 # 解压安装包
-sudo tar -C /usr/local -xzf $latest_version.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf /tmp/$latest_version.linux-amd64.tar.gz
 
 # 更新环境变量
 if ! grep -q '/usr/local/go/bin' ~/.bashrc; then
@@ -61,3 +61,6 @@ if [ "$go_proxy" != "" ]; then
   go env -w GO111MODULE=on
   go env -w GOPROXY="$go_proxy,direct"
 fi
+
+# 删除下载的压缩包
+rm /tmp/$latest_version.linux-amd64.tar.gz
