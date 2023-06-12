@@ -9,14 +9,17 @@ BBR_INSTALL_SCRIPT_OTHERS='https://raw.githubusercontent.com/Moebyte/VPS-Scripts
 TIMEZONE='Asia/Shanghai'
 LOCALE='en_US.UTF-8'
 
+# Install essential packages
+apt install -y wget curl vim dnsutils mtr unzip gcc make automake net-tools sudo iptables iftop lsof
+
 # Check if locale is already set to $LOCALE
 if ! locale | grep -q "LANG=$LOCALE"; then
     # Update package list
     apt update || exit 1
     # Upgrade packages
     apt upgrade -y || exit 1
-    # Install essential packages
-    apt install -y wget curl vim dnsutils mtr unzip gcc make automake net-tools sudo iptables iftop lsof locales || exit 1
+    # Install locales
+    apt install -y locales || exit 1
     # Generate locale
     echo "$LOCALE UTF-8" >> /etc/locale.gen || exit 1
     locale-gen $LOCALE || exit 1
