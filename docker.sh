@@ -4,8 +4,8 @@
 # Author: MoeByte
 
 # Check if user has root privileges
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
   exit
 fi
 
@@ -21,8 +21,10 @@ check_docker_installed() {
 set_mirror() {
     if curl -m 10 -s https://ipapi.co/json | grep 'China'; then
         MIRROR="https://mirrors.ustc.edu.cn/docker-ce/linux/debian"
+        DOCKER_MIRROR='{"registry-mirrors": ["https://dockerproxy.com"]}'
     else
         MIRROR="https://download.docker.com/linux/debian"
+        DOCKER_MIRROR='{}'
     fi
 }
 
@@ -48,3 +50,9 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.
 # Install Docker and related packages
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
+
+# Configure Docker mirror
+echo "$DOCKER_MIRROR" > /etc/docker/daemon.json
+
+# Restart Docker service
+systemctl restart docker
