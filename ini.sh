@@ -4,7 +4,7 @@
 # Author: MoeByte
 
 # Set variables
-BBR_INSTALL_SCRIPT_CHINA='https://lib.ntr.ms/VPS-Scripts/bbr.sh'
+BBR_INSTALL_SCRIPT_CHINA='https://lib.vb.ms/dns/VPS-Scripts/bbr.sh'
 BBR_INSTALL_SCRIPT_OTHERS='https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/bbr.sh'
 TIMEZONE='Asia/Shanghai'
 LOCALE='en_US.UTF-8'
