@@ -67,11 +67,11 @@ install_gost_latest() {
   arch="$(arch_map)"
   [[ "${arch}" != "unsupported" ]] || { echo -e "${RED}不支持架构: $(uname -m)${RST}"; exit 1; }
 
-  api="https://api.github.com/repos/go-gost/gost/releases"
+  api="https://api.github.com/repos/go-gost/gost/releases/latest"
   version="$(curl -fsSL "${api}" | awk -F'"' '/"tag_name":/ {print $4; exit}')"
   [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
 
-  download_url="$(curl -fsSL "${api}/tags/${version}" | awk -F'"' -v re=".*${os}.*${arch}.*" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
+  download_url="$(curl -fsSL "${api}" | awk -F'"' -v re=".*${os}.*${arch}.*\\.tar\\.gz" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
   [[ -n "${download_url}" ]] || { echo -e "${RED}未找到 ${os}/${arch} 安装包${RST}"; exit 1; }
 
   echo -e "${BLU}安装 gost ${version} ...${RST}"
