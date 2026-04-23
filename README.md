@@ -33,3 +33,11 @@ wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/rinetd.sh |
 ```
 ~~wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/rinetd-web.sh | bash rinetd-web.sh -p password -port :8080~~
 
+
+安装和管理 go-gost（多规则）
+```
+wget -O - https://raw.githubusercontent.com/Moebyte/VPS-Scripts/main/gost-manager.sh | bash
+```
+支持：
+- acme.sh 证书自动申请/导入（TLS/WSS）
+- 中转 + 多落地的负载均衡规则模板（ws/wss/tls）
