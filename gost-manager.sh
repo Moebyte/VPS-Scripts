@@ -33,6 +33,16 @@ need_cmd() {
   }
 }
 
+prompt_read() {
+  local __var="$1" __prompt="$2" __input=""
+  if [[ -r /dev/tty ]]; then
+    IFS= read -r -p "${__prompt}" __input < /dev/tty || return 1
+  else
+    IFS= read -r -p "${__prompt}" __input || return 1
+  fi
+  printf -v "${__var}" '%s' "${__input}"
+}
+
 prepare_env() {
   mkdir -p "${CONF_DIR}" "${CERT_DIR}"
   touch "${RULES_FILE}"
@@ -64,22 +74,32 @@ install_gost_latest() {
   need_cmd tar
   need_cmd awk
 
-  local os arch api version download_url tmp
+  local os arch api version download_url tmp release_json pkg_file
   os="linux"
   arch="$(arch_map)"
   [[ "${arch}" != "unsupported" ]] || { echo -e "${RED}不支持架构: $(uname -m)${RST}"; exit 1; }
 
   api="https://api.github.com/repos/go-gost/gost/releases/latest"
+<<<<<<< codex/update-installation-script-for-stable-version
+  release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: gost-manager" "${api}")"
+  version="$(awk -F'"' '/"tag_name":/ {print $4; exit}' <<< "${release_json}")"
+  [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
+
+  download_url="$(awk -F'"' -v re=".*${os}.*${arch}.*\\.tar\\.gz$" '/"browser_download_url":/ && $4 ~ re {print $4; exit}' <<< "${release_json}")"
+=======
   version="$(curl -fsSL "${api}" | awk -F'"' '/"tag_name":/ {print $4; exit}')"
   [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
 
   download_url="$(curl -fsSL "${api}" | awk -F'"' -v re=".*${os}.*${arch}.*\\.tar\\.gz" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
+>>>>>>> main
   [[ -n "${download_url}" ]] || { echo -e "${RED}未找到 ${os}/${arch} 安装包${RST}"; exit 1; }
 
   echo -e "${BLU}安装 gost ${version} ...${RST}"
   tmp="$(mktemp -d)"
   trap 'rm -rf "$tmp"' EXIT
-  curl -fsSL "${download_url}" | tar -xz -C "${tmp}"
+  pkg_file="${tmp}/gost.tar.gz"
+  curl -fL "${download_url}" -o "${pkg_file}" || { echo -e "${RED}下载失败: ${download_url}${RST}"; exit 1; }
+  tar -xzf "${pkg_file}" -C "${tmp}" || { echo -e "${RED}解压失败，下载内容可能不是有效的 tar.gz: ${download_url}${RST}"; exit 1; }
 
   local found
   found="$(find "${tmp}" -type f -name gost | head -n1 || true)"
@@ -169,10 +189,10 @@ add_rule_line() {
 
 add_rule_custom() {
   local name l_arg f_arg extra
-  read -rp "规则名称(唯一): " name
-  read -rp "请输入 -L 参数值: " l_arg
-  read -rp "请输入 -F 参数值(可空): " f_arg
-  read -rp "额外参数(可空，如 --log.level=info): " extra
+  prompt_read name "规则名称(唯一): " || return
+  prompt_read l_arg "请输入 -L 参数值: " || return
+  prompt_read f_arg "请输入 -F 参数值(可空): " || return
+  prompt_read extra "额外参数(可空，如 --log.level=info): " || return
   [[ -n "${name}" && -n "${l_arg}" ]] || { echo -e "${RED}名称和 -L 不可为空${RST}"; return; }
   add_rule_line "${name}" "${l_arg}" "${f_arg}" "${extra}"
 }
@@ -186,19 +206,19 @@ add_rule_quick() {
   echo "5) relay+wss"
   echo "6) 本机 socks5 代理"
   echo "7) 本机 http 代理"
-  read -rp "选择 [1-7]: " mode
-  read -rp "规则名称: " name
+  prompt_read mode "选择 [1-7]: " || return
+  prompt_read name "规则名称: " || return
   [[ -n "${name}" ]] || { echo -e "${RED}名称不能为空${RST}"; return; }
 
   case "${mode}" in
     1|2|3|4|5)
-      read -rp "监听端口: " lport
-      read -rp "目标地址(如 1.2.3.4:20000): " target
+      prompt_read lport "监听端口: " || return
+      prompt_read target "目标地址(如 1.2.3.4:20000): " || return
       ;;
     6|7)
-      read -rp "监听端口: " lport
-      read -rp "用户名(可空): " user
-      read -rp "密码(可空): " pass
+      prompt_read lport "监听端口: " || return
+      prompt_read user "用户名(可空): " || return
+      prompt_read pass "密码(可空): " || return
       ;;
     *) echo -e "${RED}无效选择${RST}"; return ;;
   esac
@@ -221,10 +241,10 @@ add_rule_quick() {
 add_lb_template() {
   echo -e "${BLU}负载均衡模板：中转 + 多落地（ws/wss/tls）${RST}"
   local prefix mode listen_port scheme backends cert_name l_arg first f_arg extra backend
-  read -rp "规则前缀(如 transit1): " prefix
-  read -rp "监听端口(中转机): " listen_port
+  prompt_read prefix "规则前缀(如 transit1): " || return
+  prompt_read listen_port "监听端口(中转机): " || return
   echo "中转协议: 1) ws  2) wss  3) tls"
-  read -rp "选择 [1-3]: " mode
+  prompt_read mode "选择 [1-3]: " || return
 
   case "${mode}" in
     1) scheme="relay+ws" ;;
@@ -233,11 +253,11 @@ add_lb_template() {
     *) echo -e "${RED}无效选择${RST}"; return ;;
   esac
 
-  read -rp "落地节点列表(逗号分隔，例: 1.1.1.1:443,2.2.2.2:443): " backends
+  prompt_read backends "落地节点列表(逗号分隔，例: 1.1.1.1:443,2.2.2.2:443): " || return
   [[ -n "${prefix}" && -n "${listen_port}" && -n "${backends}" ]] || { echo -e "${RED}参数不能为空${RST}"; return; }
 
   if [[ "${scheme}" == "relay+wss" || "${scheme}" == "relay+tls" ]]; then
-    read -rp "证书目录名(将使用 /etc/gost/certs/<name>/fullchain.cer 和 <name>.key): " cert_name
+    prompt_read cert_name "证书目录名(将使用 /etc/gost/certs/<name>/fullchain.cer 和 <name>.key): " || return
     [[ -n "${cert_name}" ]] || { echo -e "${RED}证书目录名不能为空${RST}"; return; }
     l_arg="${scheme}://:${listen_port}?certFile=${CERT_DIR}/${cert_name}/fullchain.cer&keyFile=${CERT_DIR}/${cert_name}/${cert_name}.key"
   else
@@ -263,7 +283,7 @@ add_lb_template() {
 delete_rule() {
   list_rules
   local name
-  read -rp "输入要删除的规则名称: " name
+  prompt_read name "输入要删除的规则名称: " || return
   [[ -n "${name}" ]] || return
   if grep -q "^${name}|" "${RULES_FILE}"; then
     grep -v "^${name}|" "${RULES_FILE}" > "${RULES_FILE}.tmp"
@@ -290,8 +310,8 @@ issue_cert_standalone() {
   need_cmd socat
   install_acme
 
-  read -rp "输入域名(需已解析到本机): " domain
-  read -rp "输入邮箱(用于 ACME 注册): " email
+  prompt_read domain "输入域名(需已解析到本机): " || return
+  prompt_read email "输入邮箱(用于 ACME 注册): " || return
   [[ -n "${domain}" && -n "${email}" ]] || { echo -e "${RED}域名和邮箱不能为空${RST}"; return; }
   validate_domain "${domain}" || return
 
@@ -323,9 +343,9 @@ validate_domain() {
 
 import_cert_manual() {
   local name fullchain key cert_home
-  read -rp "证书目录名(自定义，如 mydomain.com): " name
-  read -rp "fullchain 路径: " fullchain
-  read -rp "private key 路径: " key
+  prompt_read name "证书目录名(自定义，如 mydomain.com): " || return
+  prompt_read fullchain "fullchain 路径: " || return
+  prompt_read key "private key 路径: " || return
   [[ -n "${name}" && -f "${fullchain}" && -f "${key}" ]] || { echo -e "${RED}输入无效，文件不存在${RST}"; return; }
 
   cert_home="${CERT_DIR}/${name}"
@@ -350,7 +370,7 @@ service_status() {
 enable_cron_restart() {
   local spec
   echo "示例: 每天4点重启 -> 0 4 * * *"
-  read -rp "请输入 crontab 时间表达式: " spec
+  prompt_read spec "请输入 crontab 时间表达式: " || return
   [[ -n "${spec}" ]] || { echo -e "${RED}不能为空${RST}"; return; }
   cat > "${CRON_FILE}" <<CRON_EOF
 ${spec} root systemctl restart gost >/dev/null 2>&1
@@ -365,7 +385,7 @@ disable_cron_restart() {
 
 uninstall_all() {
   local ans
-  read -rp "确认卸载 gost 与配置？[y/N]: " ans
+  prompt_read ans "确认卸载 gost 与配置？[y/N]: " || return
   [[ "${ans}" =~ ^[Yy]$ ]] || return
   systemctl stop gost >/dev/null 2>&1 || true
   systemctl disable gost >/dev/null 2>&1 || true
@@ -406,7 +426,10 @@ main() {
 
   while true; do
     show_menu
-    read -rp "请选择 [0-19]: " c
+    if ! prompt_read c "请选择 [0-19]: "; then
+      echo -e "${YEL}检测到非交互输入，请使用: bash <(curl -fsSL URL) 或先下载后执行脚本。${RST}"
+      exit 1
+    fi
     case "${c}" in
       1) install_gost_latest ;;
       2) create_service; echo -e "${GRN}服务初始化完成${RST}" ;;
