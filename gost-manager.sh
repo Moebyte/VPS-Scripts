@@ -74,10 +74,15 @@ install_gost_latest() {
   need_cmd tar
   need_cmd awk
 
-  local os arch api version download_url tmp release_json pkg_file
+  local os arch arch_alt api version download_url tmp release_json pkg_file
   os="linux"
   arch="$(arch_map)"
   [[ "${arch}" != "unsupported" ]] || { echo -e "${RED}不支持架构: $(uname -m)${RST}"; exit 1; }
+  case "${arch}" in
+    amd64) arch_alt="x86_64" ;;
+    arm64) arch_alt="aarch64" ;;
+    *) arch_alt="${arch}" ;;
+  esac
 
   api="https://api.github.com/repos/go-gost/gost/releases/latest"
   release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: gost-manager" "${api}")"
@@ -85,7 +90,26 @@ install_gost_latest() {
   [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
 
   download_url="$(printf '%s\n' "${release_json}" | awk -F'"' -v re=".*${os}.*${arch}.*[.]tar[.]gz$" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
-  [[ -n "${download_url}" ]] || { echo -e "${RED}未找到 ${os}/${arch} 安装包${RST}"; exit 1; }
+  if [[ -z "${download_url}" ]]; then
+    local clean_ver candidate base
+    clean_ver="${version#v}"
+    base="https://github.com/go-gost/gost/releases/download/${version}"
+    for candidate in \
+      "gost_${version}_${os}_${arch}.tar.gz" \
+      "gost_${clean_ver}_${os}_${arch}.tar.gz" \
+      "gost-${version}-${os}-${arch}.tar.gz" \
+      "gost-${clean_ver}-${os}-${arch}.tar.gz" \
+      "gost_${version}_${os}_${arch_alt}.tar.gz" \
+      "gost_${clean_ver}_${os}_${arch_alt}.tar.gz" \
+      "gost-${version}-${os}-${arch_alt}.tar.gz" \
+      "gost-${clean_ver}-${os}-${arch_alt}.tar.gz"; do
+      if curl -fsIL "${base}/${candidate}" >/dev/null 2>&1; then
+        download_url="${base}/${candidate}"
+        break
+      fi
+    done
+  fi
+  [[ -n "${download_url}" ]] || { echo -e "${RED}未找到 ${os}/${arch} 安装包（版本 ${version}）${RST}"; exit 1; }
 
   echo -e "${BLU}安装 gost ${version} ...${RST}"
   tmp="$(mktemp -d)"
