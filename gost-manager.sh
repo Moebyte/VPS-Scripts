@@ -80,17 +80,16 @@ install_gost_latest() {
   [[ "${arch}" != "unsupported" ]] || { echo -e "${RED}不支持架构: $(uname -m)${RST}"; exit 1; }
 
   api="https://api.github.com/repos/go-gost/gost/releases/latest"
-<<<<<<< codex/update-installation-script-for-stable-version
+  release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: gost-manager" "${api}")"
+  version="$(printf '%s\n' "${release_json}" | awk -F'"' '/"tag_name":/ {print $4; exit}')"
+  [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
+
+  download_url="$(printf '%s\n' "${release_json}" | awk -F'"' -v re=".*${os}.*${arch}.*\\.tar\\.gz$" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
   release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: gost-manager" "${api}")"
   version="$(awk -F'"' '/"tag_name":/ {print $4; exit}' <<< "${release_json}")"
   [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
 
   download_url="$(awk -F'"' -v re=".*${os}.*${arch}.*\\.tar\\.gz$" '/"browser_download_url":/ && $4 ~ re {print $4; exit}' <<< "${release_json}")"
-=======
-  version="$(curl -fsSL "${api}" | awk -F'"' '/"tag_name":/ {print $4; exit}')"
-  [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
-
-  download_url="$(curl -fsSL "${api}" | awk -F'"' -v re=".*${os}.*${arch}.*\\.tar\\.gz" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
 >>>>>>> main
   [[ -n "${download_url}" ]] || { echo -e "${RED}未找到 ${os}/${arch} 安装包${RST}"; exit 1; }
 
