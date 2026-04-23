@@ -86,10 +86,13 @@ install_gost_latest() {
 
   api="https://api.github.com/repos/go-gost/gost/releases/latest"
   release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: gost-manager" "${api}")"
-  version="$(printf '%s\n' "${release_json}" | awk -F'"' '/"tag_name":/ {print $4; exit}')"
+  version="$(printf '%s' "${release_json}" | sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
   [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
 
-  download_url="$(printf '%s\n' "${release_json}" | awk -F'"' -v re=".*${os}.*${arch}.*[.]tar[.]gz$" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
+  download_url="$(printf '%s' "${release_json}" \
+    | grep -o '"browser_download_url"[[:space:]]*:[[:space:]]*"[^"]*"' \
+    | sed 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' \
+    | awk -v re=".*${os}.*${arch}.*[.]tar[.]gz$" '$0 ~ re {print; exit}')"
   if [[ -z "${download_url}" ]]; then
     local clean_ver candidate base
     clean_ver="${version#v}"
