@@ -21,10 +21,10 @@ check_docker_installed() {
 set_mirror() {
     if curl -m 10 -s https://ipapi.co/json | grep 'China'; then
         MIRROR="https://mirrors.ustc.edu.cn/docker-ce/linux/debian"
-        DOCKER_MIRROR='{"registry-mirrors": ["https://dockerproxy.com"]}'
+        DOCKER_REGISTRY_MIRRORS='["https://dockerproxy.com"]'
     else
         MIRROR="https://download.docker.com/linux/debian"
-        DOCKER_MIRROR='{}'
+        DOCKER_REGISTRY_MIRRORS='[]'
     fi
 }
 
@@ -52,7 +52,46 @@ apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
 
 # Configure Docker mirror
-echo "$DOCKER_MIRROR" > /etc/docker/daemon.json
+install -d -m 0755 /etc/docker
+DAEMON_JSON="/etc/docker/daemon.json"
+TIMESTAMP="$(date +%Y%m%d%H%M%S)"
+
+if [ ! -f "$DAEMON_JSON" ]; then
+    echo "{}" > "$DAEMON_JSON"
+else
+    cp -a "$DAEMON_JSON" "${DAEMON_JSON}.bak.${TIMESTAMP}"
+fi
+
+if command -v jq >/dev/null 2>&1; then
+    TMP_JSON="$(mktemp)"
+    if ! jq --argjson mirrors "$DOCKER_REGISTRY_MIRRORS" '.["registry-mirrors"] = $mirrors' "$DAEMON_JSON" > "$TMP_JSON"; then
+        echo "ERROR: Failed to update $DAEMON_JSON with jq."
+        rm -f "$TMP_JSON"
+        exit 1
+    fi
+    mv "$TMP_JSON" "$DAEMON_JSON"
+else
+    if [ -f "$DAEMON_JSON" ]; then
+        cp -a "$DAEMON_JSON" "${DAEMON_JSON}.bak.${TIMESTAMP}.nojq"
+    fi
+    cat > "$DAEMON_JSON" <<EOF
+{
+  "registry-mirrors": $DOCKER_REGISTRY_MIRRORS
+}
+EOF
+fi
 
 # Restart Docker service
-systemctl restart docker
+if ! systemctl daemon-reload; then
+    echo "ERROR: systemctl daemon-reload failed."
+    systemctl status docker --no-pager -l || true
+    journalctl -u docker --no-pager -n 50 || true
+    exit 1
+fi
+
+if ! systemctl restart docker; then
+    echo "ERROR: Failed to restart docker service."
+    systemctl status docker --no-pager -l || true
+    journalctl -u docker --no-pager -n 50 || true
+    exit 1
+fi
