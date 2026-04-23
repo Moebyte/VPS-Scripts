@@ -85,12 +85,6 @@ install_gost_latest() {
   [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
 
   download_url="$(printf '%s\n' "${release_json}" | awk -F'"' -v re=".*${os}.*${arch}.*\\.tar\\.gz$" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
-  release_json="$(curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: gost-manager" "${api}")"
-  version="$(awk -F'"' '/"tag_name":/ {print $4; exit}' <<< "${release_json}")"
-  [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
-
-  download_url="$(awk -F'"' -v re=".*${os}.*${arch}.*\\.tar\\.gz$" '/"browser_download_url":/ && $4 ~ re {print $4; exit}' <<< "${release_json}")"
->>>>>>> main
   [[ -n "${download_url}" ]] || { echo -e "${RED}未找到 ${os}/${arch} 安装包${RST}"; exit 1; }
 
   echo -e "${BLU}安装 gost ${version} ...${RST}"
@@ -263,17 +257,24 @@ add_lb_template() {
     l_arg="${scheme}://:${listen_port}"
   fi
 
-  IFS=',' read -r -a backend_arr <<< "${backends}"
-  first="${backend_arr[0]// /}"
+  first="${backends%%,*}"
+  first="${first// /}"
   [[ -n "${first}" ]] || { echo -e "${RED}至少需要一个落地节点${RST}"; return; }
 
   f_arg="${scheme}://${first}"
   extra=""
-  for backend in "${backend_arr[@]:1}"; do
-    backend="${backend// /}"
-    [[ -z "${backend}" ]] && continue
-    extra+=" -F=${scheme}://${backend}"
-  done
+  if [[ "${backends}" == *,* ]]; then
+    local rest old_ifs
+    rest="${backends#*,}"
+    old_ifs="${IFS}"
+    IFS=','
+    for backend in ${rest}; do
+      backend="${backend// /}"
+      [[ -z "${backend}" ]] && continue
+      extra+=" -F=${scheme}://${backend}"
+    done
+    IFS="${old_ifs}"
+  fi
 
   add_rule_line "${prefix}-lb" "${l_arg}" "${f_arg}" "${extra}"
   echo -e "${YEL}提示: 多个 -F 将交给 gost 进行链路选择/容错（具体策略取决于 gost 版本与配置）${RST}"
