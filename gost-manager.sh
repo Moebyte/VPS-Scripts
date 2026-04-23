@@ -84,7 +84,7 @@ install_gost_latest() {
   version="$(printf '%s\n' "${release_json}" | awk -F'"' '/"tag_name":/ {print $4; exit}')"
   [[ -n "${version}" ]] || { echo -e "${RED}获取版本失败${RST}"; exit 1; }
 
-  download_url="$(printf '%s\n' "${release_json}" | awk -F'"' -v re=".*${os}.*${arch}.*\\.tar\\.gz$" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
+  download_url="$(printf '%s\n' "${release_json}" | awk -F'"' -v re=".*${os}.*${arch}.*[.]tar[.]gz$" '/"browser_download_url":/ && $4 ~ re {print $4; exit}')"
   [[ -n "${download_url}" ]] || { echo -e "${RED}未找到 ${os}/${arch} 安装包${RST}"; exit 1; }
 
   echo -e "${BLU}安装 gost ${version} ...${RST}"
